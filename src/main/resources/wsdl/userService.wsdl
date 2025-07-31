@@ -1,0 +1,59 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://devotel.io/userservice" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://devotel.io/user-service" targetNamespace="http://devotel.io/user-service">
+<wsdl:types>
+<xs:schema xmlns:tns="http://devotel.io/userservice" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://devotel.io/userservice">
+<!--   Request   -->
+<xs:element name="getUserByIdRequest">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="id" type="xs:long"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<!--  Response  -->
+<xs:element name="getUserByIdResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="user" type="tns:User"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<!--  UserDTO  -->
+<xs:complexType name="User">
+<xs:sequence>
+<xs:element name="id" type="xs:long"/>
+<xs:element name="name" type="xs:string"/>
+<xs:element name="email" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>
+</wsdl:types>
+<wsdl:message name="getUserByIdResponse">
+<wsdl:part element="sch:getUserByIdResponse" name="getUserByIdResponse"> </wsdl:part>
+</wsdl:message>
+<wsdl:message name="getUserByIdRequest">
+<wsdl:part element="sch:getUserByIdRequest" name="getUserByIdRequest"> </wsdl:part>
+</wsdl:message>
+<wsdl:portType name="UserPort">
+<wsdl:operation name="getUserById">
+<wsdl:input message="tns:getUserByIdRequest" name="getUserByIdRequest"> </wsdl:input>
+<wsdl:output message="tns:getUserByIdResponse" name="getUserByIdResponse"> </wsdl:output>
+</wsdl:operation>
+</wsdl:portType>
+<wsdl:binding name="UserPortSoap11" type="tns:UserPort">
+<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+<wsdl:operation name="getUserById">
+<soap:operation soapAction=""/>
+<wsdl:input name="getUserByIdRequest">
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output name="getUserByIdResponse">
+<soap:body use="literal"/>
+</wsdl:output>
+</wsdl:operation>
+</wsdl:binding>
+<wsdl:service name="UserPortService">
+<wsdl:port binding="tns:UserPortSoap11" name="UserPortSoap11">
+<soap:address location="http://localhost:8080/ws"/>
+</wsdl:port>
+</wsdl:service>
+</wsdl:definitions>
