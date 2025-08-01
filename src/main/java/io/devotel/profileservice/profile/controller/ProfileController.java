@@ -1,6 +1,7 @@
 package io.devotel.profileservice.profile.controller;
 
 import io.devotel.profileservice.common.GeneralResponseDto;
+import io.devotel.profileservice.common.StaticStrings;
 import io.devotel.profileservice.profile.dto.AddProfileDTO;
 import io.devotel.profileservice.profile.dto.ProfileResponseDTO;
 import io.devotel.profileservice.profile.service.ProfileService;
@@ -21,12 +22,20 @@ public class ProfileController {
     public ResponseEntity<GeneralResponseDto<ProfileResponseDTO>> addProfile(@Valid @RequestBody AddProfileDTO dto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(profileService.addProfile(dto));
+                .body(GeneralResponseDto.<ProfileResponseDTO>builder()
+                        .code(HttpStatus.CREATED.value())
+                        .message(StaticStrings.PROFILE_CREATED_SUCCESSFULLY)
+                        .data(profileService.addProfile(dto))
+                        .build());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponseDto<ProfileResponseDTO>> getProfileById(@PathVariable Long id) {
         return ResponseEntity
-                .ok(profileService.getProfileById(id));
+                .ok(GeneralResponseDto.<ProfileResponseDTO>builder()
+                        .code(HttpStatus.OK.value())
+                        .message(StaticStrings.PROFILE_FETCHED_SUCCESSFULLY)
+                        .data(profileService.getProfileById(id))
+                        .build());
     }
 }
