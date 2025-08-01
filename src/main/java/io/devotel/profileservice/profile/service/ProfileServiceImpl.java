@@ -1,7 +1,5 @@
 package io.devotel.profileservice.profile.service;
 
-import io.devotel.profileservice.common.GeneralResponseDto;
-import io.devotel.profileservice.common.StaticStrings;
 import io.devotel.profileservice.exceptions.DuplicateProfileException;
 import io.devotel.profileservice.exceptions.ProfileNotFoundException;
 import io.devotel.profileservice.exceptions.UserNotFoundException;
@@ -16,7 +14,6 @@ import io.devotel.profileservice.soap.wsdl.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.ws.soap.client.SoapFaultClientException;
 
 @Service
 @RequiredArgsConstructor
@@ -28,73 +25,50 @@ public class ProfileServiceImpl implements ProfileService {
     private final ProfileMapper profileMapper;
 
     @Override
-    public GeneralResponseDto<ProfileResponseDTO> addProfile(AddProfileDTO addProfileDTO) {
-        try {
-            log.info("Adding new profile for userId={}", addProfileDTO.getUserId());
-
-            if (profileRepository.existsByUserId(addProfileDTO.getUserId())) {
-                log.warn("Duplicate profile detected for userId={}", addProfileDTO.getUserId());
-                throw new DuplicateProfileException(addProfileDTO.getUserId());
-            }
-
-            GetUserByIdResponse userResponse = userSoapClient.getUserById(addProfileDTO.getUserId());
-            User user = userResponse.getUser();
-
-            if (user == null) {
-                log.warn("User not found with id={}", addProfileDTO.getUserId());
-                throw new UserNotFoundException(addProfileDTO.getUserId());
-            }
-
-            // preventing userId from mapping to id by profileMapper(MapStruct)
-            ProfileEntity entity = profileMapper.toEntity(addProfileDTO);
-            ProfileEntity saved = profileRepository.save(entity);
-
-            ProfileResponseDTO response = profileMapper.toDto(saved);
-            response.setUser(user);
-
-            log.info("Profile saved with id={}", saved.getId());
-            return GeneralResponseDto.<ProfileResponseDTO>builder()
-                    .code(200)
-                    .message(StaticStrings.PROFILE_CREATED_SUCCESSFULLY)
-                    .data(response)
-                    .build();
-
-        } catch (Exception e) {
-            log.error("Failed to add profile: {}", e.getMessage(), e);
-            // for showing appropriate message to client
-            if (e instanceof SoapFaultClientException) {
-                throw new RuntimeException(StaticStrings.ERROR_IN_CALLING_USER_SERVICE);
-            }
-            throw new RuntimeException(StaticStrings.FAILED_TO_FETCH_PROFILE, e);
+    public ProfileResponseDTO addProfile(AddProfileDTO addProfileDTO) {
+        log.info("Adding new profile for userId={}", addProfileDTO.getUserId());
+        if (doesUserExist(addProfileDTO)) {
+            log.warn("Duplicate profile detected for userId={}", addProfileDTO.getUserId());
+            throw new DuplicateProfileException(addProfileDTO.getUserId());
         }
+        GetUserByIdResponse userResponse = userSoapClient.getUserById(addProfileDTO.getUserId());
+        User user = userResponse.getUser();
+        if (isUserNull(user)) {
+            log.warn("User not found with id={}", addProfileDTO.getUserId());
+            throw new UserNotFoundException(addProfileDTO.getUserId());
+        }
+        ProfileResponseDTO response = profileMapper.toDto(getProfileEntity(addProfileDTO));
+        response.setUser(user);
+        log.info("Profile saved with id={}", getProfileEntity(addProfileDTO).getId());
+        return response;
+    }
+
+    private ProfileEntity getProfileEntity(AddProfileDTO addProfileDTO) {
+        ProfileEntity entity = profileMapper.toEntity(addProfileDTO);
+        return profileRepository.save(entity);
+    }
+
+    private static boolean isUserNull(User user) {
+        return user == null;
+    }
+
+    private boolean doesUserExist(AddProfileDTO addProfileDTO) {
+        return profileRepository.existsByUserId(addProfileDTO.getUserId());
     }
 
     @Override
-    public GeneralResponseDto<ProfileResponseDTO> getProfileById(Long id) {
-        try {
-            log.info("Fetching profile for id={}", id);
+    public ProfileResponseDTO getProfileById(Long id) {
+        log.info("Fetching profile for id={}", id);
 
-            ProfileEntity entity = profileRepository.findById(id)
-                    .orElseThrow(() -> new ProfileNotFoundException(id));
+        ProfileEntity entity = profileRepository.findById(id)
+                .orElseThrow(() -> new ProfileNotFoundException(id));
 
-            GetUserByIdResponse userResponse = userSoapClient.getUserById(entity.getUserId());
-            User user = userResponse.getUser();
+        GetUserByIdResponse userResponse = userSoapClient.getUserById(entity.getUserId());
+        User user = userResponse.getUser();
 
-            ProfileResponseDTO response = profileMapper.toDto(entity);
-            response.setUser(user);
+        ProfileResponseDTO response = profileMapper.toDto(entity);
+        response.setUser(user);
 
-            return GeneralResponseDto.<ProfileResponseDTO>builder()
-                    .code(200)
-                    .message(StaticStrings.PROFILE_FETCHED_SUCCESSFULLY)
-                    .data(response)
-                    .build();
-
-        } catch (ProfileNotFoundException e) {
-            log.warn("Profile not found: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("Failed to fetch profile by id={}: {}", id, e.getMessage(), e);
-            throw new RuntimeException(StaticStrings.FAILED_TO_FETCH_PROFILE, e);
-        }
+        return response;
     }
 }
