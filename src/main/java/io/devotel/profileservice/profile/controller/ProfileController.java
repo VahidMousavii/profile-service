@@ -20,12 +20,13 @@ public class ProfileController {
 
     @PostMapping
     public ResponseEntity<GeneralResponseDto<ProfileResponseDTO>> addProfile(@Valid @RequestBody AddProfileDTO dto) {
+        ProfileResponseDTO profileResponseDTO = profileService.addProfile(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(GeneralResponseDto.<ProfileResponseDTO>builder()
                         .code(HttpStatus.CREATED.value())
                         .message(StaticStrings.PROFILE_CREATED_SUCCESSFULLY)
-                        .data(profileService.addProfile(dto))
+                        .data(profileResponseDTO)
                         .build());
     }
 

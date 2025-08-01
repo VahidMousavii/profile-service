@@ -37,15 +37,12 @@ public class ProfileServiceImpl implements ProfileService {
             log.warn("User not found with id={}", addProfileDTO.getUserId());
             throw new UserNotFoundException(addProfileDTO.getUserId());
         }
-        ProfileResponseDTO response = profileMapper.toDto(getProfileEntity(addProfileDTO));
-        response.setUser(user);
-        log.info("Profile saved with id={}", getProfileEntity(addProfileDTO).getId());
-        return response;
-    }
-
-    private ProfileEntity getProfileEntity(AddProfileDTO addProfileDTO) {
         ProfileEntity entity = profileMapper.toEntity(addProfileDTO);
-        return profileRepository.save(entity);
+        ProfileEntity saved = profileRepository.save(entity);
+        ProfileResponseDTO response = profileMapper.toDto(entity);
+        response.setUser(user);
+        log.info("Profile saved with id={}", saved.getId());
+        return response;
     }
 
     private static boolean isUserNull(User user) {
