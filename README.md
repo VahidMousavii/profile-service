@@ -38,13 +38,11 @@ PostgreSQL has also been installed and properly configured for database persiste
 You can access the Swagger UI of the project here:  
 🔗 http://37.32.26.21:9091/swagger-ui/index.html
 
-Although I initially planned to dockerize the services for production, I wasn’t able to complete it due to time constraints.  
-However, if you'd like to run the project locally, it can easily be done via **IntelliJ IDEA** or the terminal using the following Maven command:
-mvn spring-boot:run
+Although I initially planned to dockerize the services for production, I wasn’t able to complete it due to time constraints.
 
-Also, for convenience, I’ve configured the PostgreSQL to accept all incoming connections — so you shouldn’t encounter any database access issues.
-
-Thank you for your consideration.
+## 🚀 Running the Project Locally
+However, if you'd like to run the project locally, it can easily be done via IntelliJ IDEA or the terminal using the following Maven command:  "mvn spring-boot:run"
+Also, for convenience, I’ve configured the PostgreSQL to accept all incoming connections — so you shouldn’t encounter any database access issues when running on **PROD** environment **locally**.
 
 
 ### 📦 Prerequisites
@@ -52,3 +50,7 @@ Thank you for your consideration.
 - Maven 3.8+  : https://maven.apache.org/download.cgi
 - PostgreSQL  : https://www.postgresql.org/download/
 - -Soap-UI for SOAP Test: https://www.soapui.org/downloads/soapui/
+- IntelliJ IDEA : https://www.jetbrains.com/idea/download/
+
+I appreciate the chance to demonstrate my skills through this project.
+Thank you for your consideration.
